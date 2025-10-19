@@ -10,8 +10,10 @@
 
 
 ## My Programming Interests
-- To Learn commonly used languages like C, Python and C++
-- To be able to make simple games
-- To be able to make websites
-- To change an existing program to suit myself
-- To have a solid logic building way of thinking 
+1. To Learn commonly used languages like C, Python and C++
+2. To be able to make simple games
+3. To be able to make websites
+4. To change an existing program to suit myself
+5. To have a solid logic building way of thinking
+
+***Other than that, I have a plethora of things I do but it will takes forever to type them out here*** :)
