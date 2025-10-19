@@ -17,3 +17,12 @@
 5. To have a solid logic building way of thinking
 
 ***Other than that, I have a plethora of things I do but it will takes forever to type them out here*** :)
+
+### About me
+
+**Name:** Abdullah Ahmad
+
+**Degree:** Bachoelors Of Science in Artificial Intelligence
+
+**Hobbies:** Reading, Writing, Gaming, Sports, Movies, Anime, Tech & Hunting
+
