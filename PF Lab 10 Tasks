@@ -1,0 +1,854 @@
+#Question 1:#
+
+#include <stdio.h>
+#include <string.h>
+
+int splitString(char *input, char result[][20], char delimiter)
+{
+    int count = 0;
+    int idx = 0;
+
+    for (int i = 0; input[i] != '\0'; i++)
+    {
+        if (input[i] == delimiter)
+        {
+            if (idx > 0)
+            {
+                result[count][idx] = '\0';
+                count++;
+                idx = 0;
+            }
+        }
+        else
+        {
+            result[count][idx++] = input[i];
+        }
+    }
+
+    if (idx > 0)
+    {
+        result[count][idx] = '\0';
+        count++;
+    }
+
+    return count;
+}
+
+int main()
+{
+    char input[] = "apple,banana,orange";
+    char tokens[20][20];
+    char delimiter = ',';
+
+    printf("Input string: %s\n", input);
+    printf("Delimiter: '%c'\n\n", delimiter);
+
+    int count = splitString(input, tokens, delimiter);
+
+    printf("Token count: %d\n\n", count);
+
+    for (int i = 0; i < count; i++)
+    {
+        printf("Token %d: %s\n", i + 1, tokens[i]);
+    }
+
+    printf("\nTesting with multiple delimiters:\n");
+    char input2[] = "hello,,world,,test";
+    int count2 = splitString(input2, tokens, ',');
+    printf("Input: %s\n", input2);
+    printf("Count: %d\n", count2);
+    for (int i = 0; i < count2; i++)
+    {
+        printf("Token %d: %s\n", i + 1, tokens[i]);
+    }
+
+    return 0;
+}
+
+
+#Question 2:#
+
+#include <stdio.h>
+#include <string.h>
+
+void fileWordStatistics(char *inputFile, char *outputFile)
+{
+    FILE *fin = fopen(inputFile, "r");
+    if (fin == NULL)
+    {
+        printf("Error opening input file\n");
+        return;
+    }
+
+    char words[1000][50];
+    int wordCount = 0;
+    int lineCount = 0;
+    int charCount = 0;
+    char line[1000];
+
+    while (fgets(line, sizeof(line), fin))
+    {
+        lineCount++;
+        for (int i = 0; line[i] != '\0'; i++)
+        {
+            if (line[i] != '\n')
+                charCount++;
+        }
+
+        char *token = strtok(line, " \t\n");
+        while (token != NULL)
+        {
+            strcpy(words[wordCount++], token);
+            token = strtok(NULL, " \t\n");
+        }
+    }
+    fclose(fin);
+
+    char longest[50] = "";
+    char shortest[50];
+    strcpy(shortest, words[0]);
+
+    for (int i = 0; i < wordCount; i++)
+    {
+        if (strlen(words[i]) > strlen(longest))
+        {
+            strcpy(longest, words[i]);
+        }
+        if (strlen(words[i]) < strlen(shortest))
+        {
+            strcpy(shortest, words[i]);
+        }
+    }
+
+    int freq[1000] = {0};
+    int uniqueCount = wordCount;
+    for (int i = 0; i < uniqueCount; i++)
+    {
+        freq[i] = 1;
+        for (int j = i + 1; j < uniqueCount; j++)
+        {
+            if (strcmp(words[i], words[j]) == 0)
+            {
+                freq[i]++;
+                for (int k = j; k < uniqueCount - 1; k++)
+                {
+                    strcpy(words[k], words[k + 1]);
+                    freq[k] = freq[k + 1];
+                }
+                uniqueCount--;
+                j--;
+            }
+        }
+    }
+
+    FILE *fout = fopen(outputFile, "w");
+    fprintf(fout, "Total words: %d\n", wordCount);
+    fprintf(fout, "Total lines: %d\n", lineCount);
+    fprintf(fout, "Total characters: %d\n", charCount);
+    fprintf(fout, "Longest word: %s (%lu chars)\n", longest, strlen(longest));
+    fprintf(fout, "Shortest word: %s (%lu chars)\n", shortest, strlen(shortest));
+    fprintf(fout, "\nWord frequencies:\n");
+    for (int i = 0; i < uniqueCount; i++)
+    {
+        fprintf(fout, "%s: %d\n", words[i], freq[i]);
+    }
+    fclose(fout);
+
+    printf("Statistics written to %s\n", outputFile);
+}
+
+int main()
+{
+    char inputFile[] = "input.txt";
+    char outputFile[] = "statistics.txt";
+
+    FILE *test = fopen(inputFile, "w");
+    fprintf(test, "This is a test file\n");
+    fprintf(test, "It contains multiple words and lines\n");
+    fprintf(test, "Some words repeat like test and words\n");
+    fclose(test);
+
+    printf("Processing file: %s\n", inputFile);
+    fileWordStatistics(inputFile, outputFile);
+    printf("Results saved to: %s\n", outputFile);
+
+    return 0;
+}
+
+
+#Question 3:#
+
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    char str1[] = "hello";
+    char str2[] = "hello";
+    char str3[] = "hello";
+    char str4[] = "world";
+
+    printf("=== String Comparison Mystery ===\n\n");
+
+    printf("Case 1: str1 == str2\n");
+    printf("str1: %s (address: %p)\n", str1, (void *)str1);
+    printf("str2: %s (address: %p)\n", str2, (void *)str2);
+    printf("Result: %d\n", str1 == str2);
+    printf("Explanation: == compares memory addresses, not content\n");
+    printf("str1 and str2 are different arrays in memory\n\n");
+
+    printf("Case 2: strcmp(str1, str2)\n");
+    printf("Result: %d\n", strcmp(str1, str2));
+    printf("Explanation: strcmp compares character by character\n");
+    printf("Returns 0 when strings are identical\n\n");
+
+    printf("Case 3: strcmp(str3, str4)\n");
+    printf("str3: %s\n", str3);
+    printf("str4: %s\n", str4);
+    printf("Result: %d\n", strcmp(str3, str4));
+    printf("Explanation: Returns negative if str3 < str4 lexicographically\n");
+    printf("'h' (104) < 'w' (119) in ASCII\n\n");
+
+    printf("Case 4: Pointer comparison\n");
+    char *p1 = str1;
+    char *p2 = str1;
+    char *p3 = str2;
+    printf("p1 points to: %p\n", (void *)p1);
+    printf("p2 points to: %p\n", (void *)p2);
+    printf("p3 points to: %p\n", (void *)p3);
+    printf("p1 == p2: %d (both point to same address)\n", p1 == p2);
+    printf("p1 == p3: %d (point to different addresses)\n", p1 == p3);
+    printf("strcmp(p1, p3): %d (content is same)\n\n", strcmp(p1, p3));
+
+    printf("Summary:\n");
+    printf("- Use == for pointer address comparison\n");
+    printf("- Use strcmp() for string content comparison\n");
+    printf("- strcmp returns: 0 (equal), <0 (less), >0 (greater)\n");
+
+    return 0;
+}
+
+
+#Question 4:#
+
+#include <stdio.h>
+
+int myStrlen(char *str)
+{
+    int len = 0;
+    while (*str != '\0')
+    {
+        len++;
+        str++;
+    }
+    return len;
+}
+
+void myStrcpy(char *dest, char *src)
+{
+    while (*src != '\0')
+    {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+    *dest = '\0';
+}
+
+void myStrcat_array(char *dest, char *src)
+{
+    int i = 0;
+    while (dest[i] != '\0')
+        i++;
+
+    int j = 0;
+    while (src[j] != '\0')
+    {
+        dest[i] = src[j];
+        i++;
+        j++;
+    }
+    dest[i] = '\0';
+}
+
+void myStrcat_pointer(char *dest, char *src)
+{
+    while (*dest != '\0')
+        dest++;
+    while (*src != '\0')
+    {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+    *dest = '\0';
+}
+
+int myStrcmp(char *str1, char *str2)
+{
+    while (*str1 != '\0' && *str2 != '\0')
+    {
+        if (*str1 != *str2)
+            return *str1 - *str2;
+        str1++;
+        str2++;
+    }
+    return *str1 - *str2;
+}
+
+int main()
+{
+    printf("=== Custom strcat Implementation ===\n\n");
+
+    char str1[100] = "Hello";
+    char str2[] = " World";
+
+    printf("Array indexing version:\n");
+    printf("Before: str1 = \"%s\"\n", str1);
+    myStrcat_array(str1, str2);
+    printf("After:  str1 = \"%s\"\n\n", str1);
+
+    char str3[100] = "Hello";
+    char str4[] = " World";
+
+    printf("Pointer arithmetic version:\n");
+    printf("Before: str3 = \"%s\"\n", str3);
+    myStrcat_pointer(str3, str4);
+    printf("After:  str3 = \"%s\"\n\n", str3);
+
+    printf("Comparison:\n");
+    printf("Array indexing:\n");
+    printf("  - Uses array indices [i], [j]\n");
+    printf("  - More readable for beginners\n");
+    printf("  - Slightly more overhead\n\n");
+
+    printf("Pointer arithmetic:\n");
+    printf("  - Uses pointer increments (ptr++)\n");
+    printf("  - More efficient (fewer operations)\n");
+    printf("  - Idiomatic C style\n");
+    printf("  - Direct memory manipulation\n\n");
+
+    printf("Testing other string functions:\n");
+    char test[] = "Testing";
+    printf("myStrlen(\"%s\") = %d\n", test, myStrlen(test));
+
+    char dest[50];
+    myStrcpy(dest, "Copied");
+    printf("myStrcpy result: \"%s\"\n", dest);
+
+    printf("myStrcmp(\"abc\", \"abc\") = %d\n", myStrcmp("abc", "abc"));
+    printf("myStrcmp(\"abc\", \"xyz\") = %d\n", myStrcmp("abc", "xyz"));
+
+    return 0;
+}
+
+
+Question 5:
+
+#include <stdio.h>
+#include <string.h>
+
+void sortStringsAlphabetically(char arr[][50], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            if (strcmp(arr[j], arr[j + 1]) > 0)
+            {
+                char temp[50];
+                strcpy(temp, arr[j]);
+                strcpy(arr[j], arr[j + 1]);
+                strcpy(arr[j + 1], temp);
+            }
+        }
+    }
+}
+
+void sortStringsByLength(char arr[][50], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            if (strlen(arr[j]) > strlen(arr[j + 1]))
+            {
+                char temp[50];
+                strcpy(temp, arr[j]);
+                strcpy(arr[j], arr[j + 1]);
+                strcpy(arr[j + 1], temp);
+            }
+        }
+    }
+}
+
+void printStrings(char arr[][50], int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d. %s\n", i + 1, arr[i]);
+    }
+}
+
+int main()
+{
+    char names[5][50];
+    int count = 0;
+
+    printf("Enter 5 names:\n");
+    for (int i = 0; i < 5; i++)
+    {
+        printf("Name %d: ", i + 1);
+        scanf("%s", names[i]);
+        count++;
+    }
+
+    printf("\nOriginal list:\n");
+    printStrings(names, count);
+
+    char names_alpha[5][50];
+    for (int i = 0; i < count; i++)
+    {
+        strcpy(names_alpha[i], names[i]);
+    }
+    sortStringsAlphabetically(names_alpha, count);
+
+    printf("\nSorted alphabetically:\n");
+    printStrings(names_alpha, count);
+
+    char names_length[5][50];
+    for (int i = 0; i < count; i++)
+    {
+        strcpy(names_length[i], names[i]);
+    }
+    sortStringsByLength(names_length, count);
+
+    printf("\nSorted by length:\n");
+    printStrings(names_length, count);
+
+    return 0;
+}
+
+
+#Question 6:#
+
+#include <stdio.h>
+#include <string.h>
+
+void reverseString(char *str)
+{
+    int len = strlen(str);
+    for (int i = 0; i < len / 2; i++)
+    {
+        char temp = str[i];
+        str[i] = str[len - 1 - i];
+        str[len - 1 - i] = temp;
+    }
+}
+
+void fileLineReverser(char *inputFile, char *outputFile)
+{
+    FILE *fin = fopen(inputFile, "r");
+    FILE *fout = fopen(outputFile, "w");
+
+    if (fin == NULL || fout == NULL)
+    {
+        printf("Error opening files\n");
+        return;
+    }
+
+    char line[101];
+    while (fgets(line, sizeof(line), fin))
+    {
+        int len = strlen(line);
+        if (line[len - 1] == '\n')
+        {
+            line[len - 1] = '\0';
+            len--;
+        }
+        reverseString(line);
+        fprintf(fout, "%s\n", line);
+    }
+
+    fclose(fin);
+    fclose(fout);
+}
+
+int main()
+{
+    char inputFile[] = "input.txt";
+    char outputFile[] = "output.txt";
+
+    FILE *test = fopen(inputFile, "w");
+    fprintf(test, "Hello World\n");
+    fprintf(test, "This is a test\n");
+    fprintf(test, "C programming\n");
+    fclose(test);
+
+    printf("Input file created: %s\n", inputFile);
+    printf("Original content:\n");
+
+    FILE *display = fopen(inputFile, "r");
+    char line[101];
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    fileLineReverser(inputFile, outputFile);
+
+    printf("\nReversed content written to: %s\n", outputFile);
+    printf("Reversed content:\n");
+
+    display = fopen(outputFile, "r");
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    return 0;
+}
+
+
+#Question 7:#
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int isPalindrome(char *str)
+{
+    int len = strlen(str);
+    for (int i = 0; i < len / 2; i++)
+    {
+        if (tolower(str[i]) != tolower(str[len - 1 - i]))
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void palindromeChecker(char *inputFile)
+{
+    FILE *fin = fopen(inputFile, "r");
+    FILE *fpal = fopen("palindromes.txt", "w");
+    FILE *fnon = fopen("non-palindromes.txt", "w");
+
+    if (fin == NULL || fpal == NULL || fnon == NULL)
+    {
+        printf("Error opening files\n");
+        return;
+    }
+
+    char word[100];
+    int palCount = 0, nonCount = 0;
+
+    while (fscanf(fin, "%s", word) == 1)
+    {
+        if (isPalindrome(word))
+        {
+            fprintf(fpal, "%s\n", word);
+            palCount++;
+        }
+        else
+        {
+            fprintf(fnon, "%s\n", word);
+            nonCount++;
+        }
+    }
+
+    fclose(fin);
+    fclose(fpal);
+    fclose(fnon);
+
+    printf("Processing complete!\n");
+    printf("Palindromes: %d (saved to palindromes.txt)\n", palCount);
+    printf("Non-palindromes: %d (saved to non-palindromes.txt)\n", nonCount);
+    printf("Total words: %d\n", palCount + nonCount);
+}
+
+int main()
+{
+    char inputFile[] = "words.txt";
+
+    FILE *test = fopen(inputFile, "w");
+    fprintf(test, "radar level hello world\n");
+    fprintf(test, "madam test racecar\n");
+    fprintf(test, "noon programming kayak\n");
+    fprintf(test, "civic palindrome deed\n");
+    fclose(test);
+
+    printf("Input file created: %s\n", inputFile);
+    printf("Processing words...\n\n");
+
+    palindromeChecker(inputFile);
+
+    printf("\nPalindrome file contents:\n");
+    FILE *display = fopen("palindromes.txt", "r");
+    char line[100];
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    printf("\nNon-palindrome file contents:\n");
+    display = fopen("non-palindromes.txt", "r");
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    return 0;
+}
+
+
+#Question 8:#
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void caesarEncrypt(char *text, int shift, char *result)
+{
+    for (int i = 0; text[i] != '\0'; i++)
+    {
+        if (isupper(text[i]))
+        {
+            result[i] = ((text[i] - 'A' + shift) % 26) + 'A';
+        }
+        else if (islower(text[i]))
+        {
+            result[i] = ((text[i] - 'a' + shift) % 26) + 'a';
+        }
+        else
+        {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
+
+void caesarDecrypt(char *text, int shift, char *result)
+{
+    caesarEncrypt(text, 26 - shift, result);
+}
+
+int main()
+{
+    char text[1000];
+    char result[1000];
+    int choice, shift;
+
+    printf("=== Caesar Cipher Program ===\n\n");
+
+    printf("Menu:\n");
+    printf("1 - Encrypt text and save to file\n");
+    printf("2 - Decrypt text and display\n");
+    printf("3 - Exit\n\n");
+
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    getchar();
+
+    if (choice == 3)
+    {
+        printf("Exiting...\n");
+        return 0;
+    }
+
+    printf("Enter text: ");
+    fgets(text, sizeof(text), stdin);
+    text[strlen(text) - 1] = '\0';
+
+    printf("Enter shift value: ");
+    scanf("%d", &shift);
+
+    if (choice == 1)
+    {
+        caesarEncrypt(text, shift, result);
+        printf("\nEncrypted text: %s\n", result);
+
+        FILE *f = fopen("encrypted.txt", "w");
+        fprintf(f, "%s", result);
+        fclose(f);
+        printf("Encrypted text saved to encrypted.txt\n");
+    }
+    else if (choice == 2)
+    {
+        caesarDecrypt(text, shift, result);
+        printf("\nDecrypted text: %s\n", result);
+    }
+    else
+    {
+        printf("Invalid choice\n");
+    }
+
+    return 0;
+}
+
+
+#Question 9:#
+
+#include <stdio.h>
+#include <string.h>
+
+void textSearchReplace(char *inputFile, char *outputFile, char *search, char *replace)
+{
+    FILE *fin = fopen(inputFile, "r");
+    FILE *fout = fopen(outputFile, "w");
+
+    if (fin == NULL || fout == NULL)
+    {
+        printf("Error opening files\n");
+        return;
+    }
+
+    char lines[1000][1000];
+    int lineCount = 0;
+    int replaceCount = 0;
+
+    while (fgets(lines[lineCount], 1000, fin))
+    {
+        lineCount++;
+    }
+    fclose(fin);
+
+    for (int i = 0; i < lineCount; i++)
+    {
+        char *pos = strstr(lines[i], search);
+        while (pos != NULL)
+        {
+            replaceCount++;
+            int searchLen = strlen(search);
+            int replaceLen = strlen(replace);
+            int tailLen = strlen(pos + searchLen);
+
+            memmove(pos + replaceLen, pos + searchLen, tailLen + 1);
+            memcpy(pos, replace, replaceLen);
+
+            pos = strstr(pos + replaceLen, search);
+        }
+        fprintf(fout, "%s", lines[i]);
+    }
+
+    fclose(fout);
+    printf("Replacements made: %d\n", replaceCount);
+}
+
+int main()
+{
+    char inputFile[] = "input.txt";
+    char outputFile[] = "output.txt";
+    char search[100], replace[100];
+
+    FILE *test = fopen(inputFile, "w");
+    fprintf(test, "This is a test file.\n");
+    fprintf(test, "This file contains test data.\n");
+    fprintf(test, "We will test the search and replace.\n");
+    fclose(test);
+
+    printf("=== Text Search and Replace ===\n\n");
+
+    printf("Input file created: %s\n", inputFile);
+    printf("Original content:\n");
+    FILE *display = fopen(inputFile, "r");
+    char line[1000];
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    printf("\nEnter word to search: ");
+    scanf("%s", search);
+
+    printf("Enter replacement word: ");
+    scanf("%s", replace);
+
+    printf("\nProcessing...\n");
+    textSearchReplace(inputFile, outputFile, search, replace);
+
+    printf("\nModified content (saved to %s):\n", outputFile);
+    display = fopen(outputFile, "r");
+    while (fgets(line, sizeof(line), display))
+    {
+        printf("%s", line);
+    }
+    fclose(display);
+
+    return 0;
+}
+
+
+
+#Question 10:#
+
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    printf("=== String Memory Detective ===\n\n");
+
+    char arr1[10] = "Hello";
+    char arr2[10] = "Hello";
+    char *str3 = "Hello";
+
+    printf("1. Comparing char arr1[10] = \"Hello\":\n");
+    printf("   Address of arr1: %p\n", (void *)arr1);
+    printf("   Content: %s\n", arr1);
+    printf("   Size: %lu bytes\n\n", sizeof(arr1));
+
+    printf("2. Comparing char arr2[10] = \"Hello\":\n");
+    printf("   Address of arr2: %p\n", (void *)arr2);
+    printf("   Content: %s\n", arr2);
+    printf("   Size: %lu bytes\n\n", sizeof(arr2));
+
+    printf("3. Comparing char *str3 = \"Hello\":\n");
+    printf("   Address of pointer str3: %p\n", (void *)&str3);
+    printf("   str3 points to: %p (string literal)\n", (void *)str3);
+    printf("   Content: %s\n", str3);
+    printf("   Size of pointer: %lu bytes\n\n", sizeof(str3));
+
+    printf("=== Testing arr1 == arr2 ===\n");
+    printf("Result: %d\n", arr1 == arr2);
+    printf("Explanation: Compares addresses (different arrays)\n\n");
+
+    printf("=== Testing strcmp(arr1, arr2) ===\n");
+    printf("Result: %d\n", strcmp(arr1, arr2));
+    printf("Explanation: Compares content (both are \"Hello\")\n\n");
+
+    printf("=== Modifying arr1[0] ===\n");
+    arr1[0] = 'h';
+    printf("arr1 after modification: %s\n", arr1);
+    printf("Allowed: Stack arrays can be modified\n\n");
+
+    printf("=== String Literal Memory ===\n");
+    printf("String literals are stored in read-only memory\n");
+    printf("Attempting to modify str3[0] would cause segmentation fault\n\n");
+
+    printf("=== Character Storage ===\n");
+    printf("Each character: 1 byte\n");
+    printf("Null terminator: 1 byte\n");
+    printf("\"Hello\" needs: 6 bytes (5 chars + '\\0')\n\n");
+
+    printf("=== Memory Layout ===\n");
+    for (int i = 0; i < 6; i++)
+    {
+        printf("arr1[%d] = '%c' (ASCII %d) at %p\n",
+               i, arr1[i] ? arr1[i] : '0', arr1[i], (void *)&arr1[i]);
+    }
+
+    printf("\n=== Summary ===\n");
+    printf("1. Stack strings: Can be modified\n");
+    printf("2. String literals: Read-only, in text segment\n");
+    printf("3. == compares addresses, strcmp() compares content\n");
+    printf("4. Modifying string literals causes undefined behavior\n");
+
+    return 0;
+}
